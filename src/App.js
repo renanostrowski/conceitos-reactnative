@@ -17,15 +17,20 @@ export default function App() {
   useEffect(() => {
     api.get('repositories').then(response => {
       setRepositories(response.data);
-    });
+    })
   }, []);
 
   async function handleLikeRepository(id) {
-    console.log(id);
-    const {data: newrepos} = await api.post(`repositories/:${id}/like`);
-    const newRepositories = repositories.map(repository => repository.id !== id ? repository : newrepos);
+    const liked = await api.post(`repositories/${id}/like`);
 
-    setRepositories(newRepositories);
+    setRepositories(repositories.map(repos => {
+      if(repos.id === id){
+        return repos = liked.data;
+      }
+      else{
+        return repos;
+      }
+    }));
 
   }
 
@@ -33,13 +38,14 @@ export default function App() {
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
-        <View style={styles.repositoryContainer}>
+        
           <FlatList 
           style={styles.repositoryContainer}
           data={repositories}
           keyExtractor={repository => repository.id}
           renderItem={({item: repository}) => (
-            <>
+          
+          <View style={styles.repositoryContainer} key={repository.id}>
             <Text style={styles.repository}>{repository.title}</Text>
 
             <View style={styles.techsContainer}>
@@ -68,10 +74,9 @@ export default function App() {
             >
               <Text style={styles.buttonText}>Curtir</Text>
             </TouchableOpacity>
-            </>
-          )}
-          />
-        </View>
+            </View>
+          )}>
+          </FlatList>
       </SafeAreaView>
     </>
   );
